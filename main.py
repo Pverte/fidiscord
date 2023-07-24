@@ -63,7 +63,7 @@ async def on_message(message):
             levels_author = levels_db.find_one({"_id": author_id})
         levels_db.update_one({"_id": author_id}, {"$inc": {"xp": 1}})
 
-        xp_needed = (levels_author["level"]+1)**2
+        xp_needed = ((levels_author["level"]+1)**2)*10
         if levels_author["xp"] >= xp_needed:
             await message.reply(f"Congrats {message.author.mention}! You are now level {levels_author['level'] + 1}!")
             levels_db.update_one({"_id": author_id}, {"$inc": {"level": 1}})
@@ -247,7 +247,7 @@ async def level(ctx, member: discord.Member = None):
     if levels_author is not None:
         user_level = levels_author["level"]
         user_xp = levels_author["xp"]
-        await ctx.respond(f"{author_name}'s level is {user_level} and have {user_xp} XP. {author_name} needs {(user_level+1)**2 - user_xp} XP to reach the next level.")
+        await ctx.respond(f"{author_name}'s level is {user_level} and have {user_xp} XP. {author_name} needs {((user_level+1)**2)*10 - user_xp} XP to reach the next level.")
     else:
         await ctx.respond("You haven't earned any XP yet.")
 
