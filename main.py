@@ -4,7 +4,7 @@ import asyncio
 import os
 import sys
 from datetime import datetime
-
+import tokens
 from pymongo_get_database import get_database
 
 # Get the database
@@ -334,6 +334,6 @@ async def restart(ctx):
         return
     await ctx.respond("<:yes:1131632585244688424> All processes have been restarted", ephemeral=False)
     print("Restarting bot...")
-    os.execv(sys.executable, ["python", os.path.abspath(__file__)])
+    os.execv(sys.executable, ["python",__file__])
 
 bot.run(tokens.discordtoken)
