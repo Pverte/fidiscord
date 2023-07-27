@@ -19,7 +19,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 # Constants
 levels_roles = {5: "level 5", 10: "level 10", 20: "level 20", 30: "level 30", 50: "level 50", 75: "level 75", 100: "level 100"}
 verification_role = 1049314940709773352
-welcome_chan = 1077721642496700457
+welcome_chan = 1048814654262087761
 modchan = 1049065426744783033
 
 # Global variable to hold the moderation channel
@@ -251,6 +251,19 @@ async def level(ctx, member: discord.Member = None):
     else:
         await ctx.respond("You haven't earned any XP yet.")
 
+@bot.slash_command(name="leaderboard", description="Check the server's leaderboard")
+async def leaderboard(ctx):
+    leaderboard = levels_db.find().sort("level", -1).limit(10)
+    embed = discord.Embed(title="Leaderboard", color=discord.Colour.blurple())
+    for index, user in enumerate(leaderboard):
+        user_id = user["_id"]
+        user_obj = await bot.fetch_user(user_id)
+        user_name = user_obj.name
+        user_level = user["level"]
+        user_xp = user["xp"]
+        embed.add_field(name=f"{index+1}. {user_name}", value=f"Level: {user_level} with {user_xp} XP", inline=False)
+    await ctx.respond(embed=embed)
+
 @bot.slash_command(name="whois", description="Get information about a user")
 async def whois(ctx, member: discord.Member = None):
     member = member or ctx.author
@@ -268,6 +281,50 @@ async def whois(ctx, member: discord.Member = None):
 
     await ctx.respond(embed=embed)
 
+
+@bot.slash_command(name="serverinfo", description="Get information about the server")
+async def server_info(ctx):
+    guild = ctx.guild
+
+    # Get information about the server
+    server_name = guild.name
+    server_owner = guild.owner
+    server_creation_date = guild.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    member_count = guild.member_count
+    role_count = len(guild.roles)
+    text_channel_count = len(guild.text_channels)
+    voice_channel_count = len(guild.voice_channels)
+    verification_level = guild.verification_level.name
+    server_icon_url = guild.icon.url if guild.icon else discord.Embed.Empty  # Use the server icon URL or set to discord.Embed.Empty if no icon
+
+    # Create the embed with the server information
+    embed = discord.Embed(title="Server Information", color=discord.Colour.green())
+    embed.set_thumbnail(url=server_icon_url)  # Set the server icon URL as the thumbnail
+    embed.add_field(name="Name", value=server_name, inline=False)
+    embed.add_field(name="Owner", value=server_owner.mention, inline=False)
+    embed.add_field(name="Creation Date", value=server_creation_date, inline=False)
+    embed.add_field(name="Members", value=member_count, inline=True)
+    embed.add_field(name="Roles", value=role_count, inline=True)
+    embed.add_field(name="Text Channels", value=text_channel_count, inline=True)
+    embed.add_field(name="Voice Channels", value=voice_channel_count, inline=True)
+    embed.add_field(name="Verification Level", value=verification_level, inline=True)
+    embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
+
+    await ctx.respond(embed=embed)
+
+bot_start_time = datetime.utcnow()
+
+@bot.slash_command(name="uptime", description="Check the bot's uptime")
+async def uptime(ctx):
+    uptime_delta = datetime.utcnow() - bot_start_time
+    days = uptime_delta.days
+    hours, remainder = divmod(uptime_delta.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+
+    uptime_str = f"{days} days, {hours} hrs, {minutes} min, {seconds} sec"
+    embed = discord.Embed(title="Uptime", description=uptime_str, color=discord.Colour.blue())
+    await ctx.respond(embed=embed)
+
 @bot.slash_command(name="restart")
 async def restart(ctx):
     allowed_users = [749895975694499930, 577089415369981952]
@@ -277,6 +334,6 @@ async def restart(ctx):
         return
     await ctx.respond("<:yes:1131632585244688424> All processes have been restarted", ephemeral=False)
     print("Restarting bot...")
-    os.execv(sys.executable, ["python3", __file__])
+    os.execv(sys.executable, ["python3",__file__])
 
 bot.run(tokens.discordtoken)
