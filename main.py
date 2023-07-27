@@ -336,4 +336,4 @@ async def restart(ctx):
     print("Restarting bot...")
     os.execv(sys.executable, ["python", os.path.abspath(__file__)])
 
-bot.run('MTEyODI0MjY5Mzc0MzU3NTA4MA.GE8qFX.jTn_jHw3MuuHLkQu_Q6YdvS9pP58xI-7OMo8FY')
+bot.run(tokens.discordtoken)
