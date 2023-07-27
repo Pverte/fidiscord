@@ -334,6 +334,6 @@ async def restart(ctx):
         return
     await ctx.respond("<:yes:1131632585244688424> All processes have been restarted", ephemeral=False)
     print("Restarting bot...")
-    os.execv(sys.executable, ["python",__file__])
+    os.execv(sys.executable, ["python3",__file__])
 
 bot.run(tokens.discordtoken)
