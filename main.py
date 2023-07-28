@@ -312,6 +312,34 @@ async def server_info(ctx):
 
     await ctx.respond(embed=embed)
 
+    emojis_button = discord.ui.Button(style=discord.ButtonStyle.secondary, label="Emojis", emoji="🙂")
+
+    async def show_emojis(interaction):
+        emojis = [str(emoji) for emoji in guild.emojis]
+        if emojis:
+            emoji_str = " ".join(emojis)
+            emoji_embed = discord.Embed(title="Emojis", description=emoji_str)
+            await interaction.response.send_message(embed=emoji_embed, ephemeral=True)
+        else:
+            await interaction.response.send_message("No emojis found.", ephemeral=True)
+
+    emojis_button.callback = show_emojis
+
+    roles_button = discord.ui.Button(style=discord.ButtonStyle.secondary, label="Roles", emoji="🔒")
+
+    async def show_roles(interaction):
+     roles_str = "\n".join(role.mention for role in sorted(guild.roles, key=lambda role: role.position, reverse=True))        
+     roles_embed = discord.Embed(title="Roles", description=roles_str)
+     await interaction.response.send_message(embed=roles_embed, ephemeral=True)
+
+    roles_button.callback = show_roles
+
+    view = discord.ui.View(timeout=None)
+    view.add_item(emojis_button)
+    view.add_item(roles_button)
+
+    await ctx.respond(embed=embed, view=view)
+
 bot_start_time = datetime.utcnow()
 
 @bot.slash_command(name="uptime", description="Check the bot's uptime")
