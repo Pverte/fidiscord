@@ -310,7 +310,7 @@ async def server_info(ctx):
     embed.add_field(name="Verification Level", value=verification_level, inline=True)
     embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
     
-        emojis_button = discord.ui.Button(style=discord.ButtonStyle.secondary, label="Emojis", emoji="🙂")
+    emojis_button = discord.ui.Button(style=discord.ButtonStyle.secondary, label="Emojis", emoji="🙂")
 
     async def show_emojis(interaction):
         emojis = [str(emoji) for emoji in guild.emojis]
