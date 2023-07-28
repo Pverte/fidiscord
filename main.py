@@ -19,7 +19,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 # Constants
 levels_roles = {5: "level 5", 10: "level 10", 20: "level 20", 30: "level 30", 50: "level 50", 75: "level 75", 100: "level 100"}
 verification_role = 1049314940709773352
-welcome_chan = 1048814654262087761
+welcome_chan = 1077721642496700457
 modchan = 1049065426744783033
 
 # Global variable to hold the moderation channel
@@ -75,7 +75,7 @@ async def on_member_update(before, after):
     if verification_role in after_role and verification_role not in before_role:
         print(f"{after.name} has been verified!")
         channel = bot.get_channel(welcome_chan)
-        await channel.send(f"<@1062907835199004772>\n Welcome {after.mention} to Fur Island! Explore the server’s awesome features and invite some friends to help grow the server! We hope you enjoy your stay!\n \n Don't forget to check out our roles by clicking Channels & Roles at the top of the channel list!")
+        await channel.send(f"<@&1062907835199004772>\n Welcome {after.mention} to Fur Island! Explore the server’s awesome features and invite some friends to help grow the server! We hope you enjoy your stay!\n \n Don't forget to check out our roles by clicking Channels & Roles at the top of the channel list!")
 
     # send an embed message with the updated profile before and after
     if before.display_name != after.display_name:
