@@ -264,15 +264,15 @@ async def leaderboard(ctx):
         embed.add_field(name=f"{index+1}. {user_name}", value=f"Level: {user_level} with {user_xp} XP", inline=False)
     await ctx.respond(embed=embed)
 
-@bot.slash_command(name="whois", description="Get information about a user")
-async def whois(ctx, member: discord.Member = None):
+@bot.slash_command(name="userinfo", description="Get information about a user")
+async def userinfo(ctx, member: discord.Member = None):
     member = member or ctx.author
 
     embed = discord.Embed(title="User Information", color=discord.Colour.blurple())
     embed.set_thumbnail(url=member.avatar.url)
-    embed.add_field(name="Name", value=member.name, inline=True)
+    embed.set_author(name=member.display_name, icon_url=member.avatar.url)
     embed.add_field(name="ID", value=member.id, inline=True)
-    embed.add_field(name="Bot", value=member.bot, inline=True)
+    embed.add_field(name="Mention", value=member.mention, inline=True)
     roles_str = ", ".join(role.mention for role in member.roles[1:])
     embed.add_field(name="Roles", value=roles_str, inline=False)
     embed.add_field(name="Created At", value=member.created_at.strftime("%Y-%m-%d %H:%M:%S"), inline=True)
@@ -280,7 +280,6 @@ async def whois(ctx, member: discord.Member = None):
     embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
 
     await ctx.respond(embed=embed)
-
 
 @bot.slash_command(name="serverinfo", description="Get information about the server")
 async def server_info(ctx):
@@ -350,6 +349,24 @@ async def uptime(ctx):
     uptime_str = f"{days} days, {hours} hrs, {minutes} min, {seconds} sec"
     embed = discord.Embed(title="Uptime", description=uptime_str, color=discord.Colour.blue())
     await ctx.respond(embed=embed)
+
+def has_say_command_role():
+    def predicate(ctx):
+        if ctx.guild is None:
+            return False
+        user_roles = ctx.author.roles
+        for role in user_roles:
+            if role.id == say_command_role_id or role.position > discord.utils.get(ctx.guild.roles, id=say_command_role_id).position:
+                return True
+        return False
+
+    return commands.check(predicate)
+    
+@bot.slash_command(name="say", description="Say something as the bot")
+@has_say_command_role()
+async def say(ctx, *, channel: discord.TextChannel, message: str):
+    await channel.send(message)
+    await ctx.respond(f"Message sent successfully to {channel.mention}", ephemeral=True)
 
 @bot.slash_command(name="restart")
 async def restart(ctx):
