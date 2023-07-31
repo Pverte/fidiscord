@@ -21,6 +21,7 @@ levels_roles = {5: "level 5", 10: "level 10", 20: "level 20", 30: "level 30", 50
 verification_role = 1049314940709773352
 welcome_chan = 1077721642496700457
 modchan = 1049065426744783033
+say_command_role_id = 1130797054529130535
 
 # Global variable to hold the moderation channel
 modchannel = None
