@@ -22,6 +22,7 @@ verification_role = 1049314940709773352
 welcome_chan = 1077721642496700457
 modchan = 1049065426744783033
 say_command_role_id = 1130797054529130535
+blocked_channels = [1102696804140720139, 1102696766316478484, 1102696817377955990, 1134555368853360640, 1102697523392557056, 1077734697188216923]
 
 # Global variable to hold the moderation channel
 modchannel = None
@@ -62,8 +63,10 @@ async def on_message(message):
         if levels_author is None: # if the user is not in the database, add them
             levels_db.insert_one({"_id": author_id, "xp": 0, "level": 1})
             levels_author = levels_db.find_one({"_id": author_id})
-        levels_db.update_one({"_id": author_id}, {"$inc": {"xp": 1}})
 
+        if message.channel.id in blocked_channels:
+            return
+        levels_db.update_one({"_id": author_id}, {"$inc": {"xp": 1}})
         xp_needed = ((levels_author["level"]+1)**2)*10
         if levels_author["xp"] >= xp_needed:
             await message.reply(f"Congrats {message.author.mention}! You are now level {levels_author['level'] + 1}!")
