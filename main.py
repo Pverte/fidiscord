@@ -33,13 +33,14 @@ async def sendlog(embed):
     if modchannel is None:
         modchannel = bot.get_channel(modchan)
     await modchannel.send(embed=embed)
+    await bot.get_channel(1049478780625895464).send(embed=embed)
 
 # Helper functions
 
 def check_warnings(user_id):
     return warnings_db.count_documents({"author_id": str(user_id)})
 
-def save_warning(author_id, user_id, reason, moderator_id):
+def save_warning(user_id, reason, moderator_id):
     current_time = datetime.now()
     warnings_db.insert_one({
         "author_id": str(user_id),
@@ -121,92 +122,125 @@ async def on_member_remove(member):
     embed.set_footer(text=f"ID: {member.id}")
     await sendlog(embed)
 
+def has_trial_staff_role():
+    def predicate(ctx):
+        if ctx.guild is None:
+            return False
+
+        trial_staff_role_id = 1077722313140736131
+        trial_staff_role = discord.utils.get(ctx.author.roles, id=trial_staff_role_id)
+        return trial_staff_role is not None
+
+    return commands.check(predicate)
+
+def has_staff_role():
+    def predicate(ctx):
+        if ctx.guild is None:
+            return False
+        staff_role_id = 1077722405188948049
+        staff_role = discord.utils.get(ctx.author.roles, id=staff_role_id)
+        return staff_role is not None
+
+    return commands.check(predicate)
+
 @bot.slash_command(name="ban", description="Ban a user from the server") # ban command
-@commands.has_permissions(ban_members=True)
-async def ban(ctx, member: discord.Member):
-    await member.ban(reason=f"Banned by {ctx.author.name}")
-    await ctx.respond(f"{member.name} has been banned from the server.", ephemeral=True)
+@has_staff_role()
+async def ban(ctx, member: discord.Member, *, reason: str = "No reason provided"):
+    await member.ban(reason=f"Banned by {ctx.author.name} for {reason}")
+    embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been banned.", color=discord.Colour.green())
+    await ctx.respond(embed=embed)
 
 @bot.slash_command(name="unban", description="Unban a user from the server")
-@commands.has_permissions(ban_members=True)
+@has_staff_role()
 async def unban(ctx, user_id: str):
     try:
         user_id = int(user_id)  # Convert the user_id to an integer
         user = await bot.fetch_user(user_id)
         await ctx.guild.unban(user)
-        await ctx.respond(f"{user.mention} has been unbanned.")
+        embed= discord.Embed(description=f"<:yes:1131632585244688424> | **{user.mention}** has been unbanned.")
+        await ctx.respond(embed=embed)
     except ValueError:
-        await ctx.respond("Please provide a valid user ID.")
+        embed_error= discord.Embed(description="<:error:1131632583696977990> | I need the user ID")
+        await ctx.respond(embed=embed_error)
     except discord.NotFound:
-        await ctx.respond("User not found. Make sure you provide the correct user ID.")
+        embed_error_2= discord.Embed(description="<:error:1131632583696977990> | User not found. Make sure you provide the correct user ID.")
+        await ctx.respond(embed=embed_error_2)
 
 @bot.slash_command(name="kick", description="Kick an user from the server") # kick command
-@commands.has_permissions(kick_members=True)
+@has_staff_role()
 async def kick(ctx, member: discord.Member):
     await member.kick(reason=f"Kicked by {ctx.author.name}")
-    await ctx.respond(f"{member.name} has been kicked from the server.")
-
+    embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been kicked.")
+    await ctx.respond(embed=embed)
 
 @bot.slash_command(name="warn", description="Warn a user.")
-@commands.has_permissions(kick_members=True)
+@has_trial_staff_role()
 async def warn(ctx, member: discord.Member, *, reason: str):
-    save_warning(member.id, ctx.author.id, reason, ctx.author.id)  # Assuming ctx.author.id is the moderator ID
+    save_warning(member.id, reason, ctx.author.id) 
     num_warnings = check_warnings(member.id)
-    print("passed check_warnings")
+    print("Passed check_warnings")
     print(num_warnings)
     if num_warnings >= 3:
         await member.kick(reason="Reached three warnings")
-        await ctx.respond(f"{member.name} has been kicked for reaching three warnings.")
+        embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been kicked for reaching three warnings")
+        await ctx.respond(embed=embed)
     else:
         try:
             dm_channel = await member.create_dm()
-            await dm_channel.send(f"You have been warned in **{ctx.guild.name}** for: **{reason}**")
+            embed2 = discord.Embed(description=f"You have been warned in **Fur island** for: **{reason}**")
+            await dm_channel.send(embed=embed2)
         except discord.errors.HTTPException:
-            await ctx.respond(f"Warning for {member.name} (ID: {member.id}) recorded, but I couldn't send a DM to the user.")
+            embed3 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been warned")
+            await ctx.respond(embed=embed3)
             return
-        await ctx.respond(f"**{member.name} has been warned** for: {reason}.")
+        await ctx.respond(embed=embed3)
 
 @bot.slash_command(name="warnings", description="View warnings of a user")
-@commands.has_permissions(kick_members=True)
+@has_trial_staff_role()
 async def warnings(ctx, member: discord.Member):
     user_warnings = list(warnings_db.find({"author_id": str(member.id)}))  # Convert Cursor to a list
     num_warnings = len(user_warnings)
     if num_warnings == 0:
-        await ctx.respond(f"{member.name} has no warnings.", ephemeral=True)
+        embed_nowarning = discord.Embed(description=f"**{member.name}** has no warnings")
+        await ctx.respond(embed=embed_nowarning)
         return
     warning_message = f"Warnings for {member.name} (ID: {member.id}):\n\n"
     for warning in user_warnings:
         moderator_id = warning["moderator_id"]
         moderator = bot.get_user(int(moderator_id)) or f"Unknown User (ID: {moderator_id})"
         timestamp = warning["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
-        warning_message += f"**ID:** {warning['_id']} - **Reason:** {warning['reason']} - **Moderator:** {moderator} - **Date:** {timestamp}\n"
+        warning_message += f"**Reason:** {warning['reason']} - **Moderator:** {moderator} - **Date:** {timestamp}\n"
 
     await ctx.respond(warning_message)
 
-@bot.slash_command(name="unwarn", description="Remove warnings from a user")
-@commands.has_permissions(kick_members=True)
-async def remove_warn(ctx, member: discord.Member, num_warns: int):
+@bot.slash_command(name="unwarn", description="Remove warnings from a user. ")
+@has_trial_staff_role()
+async def remove_warn(ctx, member: discord.Member, numbers_of_warns: int):
     num_warnings = check_warnings(member.id)
 
-    if num_warns <= 0:
-        await ctx.respond("Please provide a positive number of warnings to remove.", ephemeral=True)
+    if numbers_of_warns <= 0:
+        embed_please = discord.Embed(description=f"<:error:1131632583696977990> **|** Please provide a positive number of warnings to remove")
+        await ctx.respond(embed=embed_please)
         return
 
     if num_warnings == 0:
-        await ctx.respond(f"{member.name} has no warnings to remove.", ephemeral=True)
+        embed_hasnt = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** has no warnings to remove.")
+        await ctx.respond(embed=embed_hasnt)
         return
 
-    if num_warnings < num_warns:
-        await ctx.respond(f"{member.name} only has {num_warnings} warning(s).", ephemeral=True)
+    if num_warnings < numbers_of_warns:
+        embed_2 = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** only has **{num_warnings}** warning(s)")
+        await ctx.respond(embed=embed_2)
         return
     #removes the number of warnings from the user from the warnings database
-    for i in range(num_warns):
+    for i in range(numbers_of_warns):
         warning = warnings_db.find_one({"author_id": str(member.id)})
         warnings_db.delete_one(warning)
-    await ctx.respond(f"{num_warns} warnings removed for {member.name}.")
+        embed_yes = discord.Embed(description=f"<:yes:1131632585244688424> | **{numbers_of_warns}** warnings removed for **{member.name}**")
+    await ctx.respond(embed=embed_yes)
 
 @bot.slash_command(name="mute", description="Mute an user")
-@commands.has_permissions(kick_members=True)
+@has_trial_staff_role()
 async def mute(ctx, member: discord.Member, reason=None):
     guild = ctx.guild.id
     muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
@@ -215,29 +249,32 @@ async def mute(ctx, member: discord.Member, reason=None):
         for channel in ctx.guild.channels:
             await channel.set_permissions(muted_role, speak=False, send_messages=False, read_message_history=True, read_messages=True)
     await member.add_roles(muted_role, reason=reason)
-    embed = discord.Embed(title="New event", description=f"{member.mention} has been muted", colour=discord.Colour.red())
+    embed = discord.Embed(title="New event", description=f"**{member.mention}** has been muted", colour=discord.Colour.red())
     embed.add_field(name="Moderator :", value=ctx.author.mention, inline=False)
     embed.add_field(name="Raison :", value=reason, inline=False)
     await sendlog(embed)
-    await ctx.respond(f"{member.display_name} has been muted successfully.")
+    embed_2 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.display_name}** has been muted successfully.")
+    await ctx.respond(embed=embed_2)
 
 @bot.slash_command(name="unmute", description="Unmute an user")
-@commands.has_permissions(kick_members=True)
+@has_trial_staff_role()
 async def unmute(ctx, member: discord.Member):
     muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
     await member.remove_roles(muted_role)
     global modchannel
     if modchannel is None:
         modchannel = bot.get_channel(modchan)
-    await modchannel.send(embed=discord.Embed(title="New event", description=f"{member.mention} has been unmuted", colour=discord.Colour.green()))
-    await ctx.respond(f"{member.display_name} has been unmuted successfully.")
+    await modchannel.send(embed=discord.Embed(title="New event", description=f"**{member.mention}** has been unmuted", colour=discord.Colour.green()))
+    embed2 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.display_name}** has been unmuted successfully.")
+    await ctx.respond(embed=embed2)
 
 @bot.slash_command(name="purge", description="Delete a specific number of messages in the channel.")
-@commands.has_permissions(manage_messages=True)
+@has_trial_staff_role()
 async def purge(ctx, limit: int):
     limit = min(limit + 1, 1000)
     deleted = await ctx.channel.purge(limit=limit)
-    await ctx.respond(f"Deleted {len(deleted) - 1} messages.")
+    embed = discord.Embed(description=f"<:yes:1131632585244688424> **|** Deleted {len(deleted) - 1} messages.")
+    await ctx.respond(embed=embed)
 
 @bot.slash_command(name="level", description="Check your level and XP")
 async def level(ctx, member: discord.Member = None):
