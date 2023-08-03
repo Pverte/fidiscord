@@ -405,9 +405,10 @@ def has_say_command_role():
     
 @bot.slash_command(name="say", description="Say something as the bot")
 @has_say_command_role()
-async def say(ctx, *, channel: discord.TextChannel, message: str):
+async def say(ctx, channel: discord.TextChannel, *, message: str):
     await channel.send(message)
-    await ctx.respond(f"Message sent successfully to {channel.mention}", ephemeral=True)
+    embed = discord.Embed(description=f"<:yes:1131632585244688424> | Message sent successfully to {channel.mention}", color=discord.Colour.green())
+    await ctx.respond(embed=embed, ephemeral=True)
 
 @bot.slash_command(name="restart")
 async def restart(ctx):
