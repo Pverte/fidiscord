@@ -219,24 +219,24 @@ async def remove_warn(ctx, member: discord.Member, numbers_of_warns: int):
     num_warnings = check_warnings(member.id)
 
     if numbers_of_warns <= 0:
-        embed_please = discord.Embed(description=f"<:error:1131632583696977990> **|** Please provide a positive number of warnings to remove", color=discord.Colour.red())
+        embed_please = discord.Embed(description=f"<:error:1131632583696977990> **|** Please provide a positive number of warnings to remove")
         await ctx.respond(embed=embed_please)
         return
 
     if num_warnings == 0:
-        embed_hasnt = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** has no warnings to remove.", color=discord.Colour.green())
+        embed_hasnt = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** has no warnings to remove.")
         await ctx.respond(embed=embed_hasnt)
         return
 
     if num_warnings < numbers_of_warns:
-        embed_2 = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** only has **{num_warnings}** warning(s)", color=discord.Colour.green())
+        embed_2 = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** only has **{num_warnings}** warning(s)")
         await ctx.respond(embed=embed_2)
         return
     #removes the number of warnings from the user from the warnings database
     for i in range(numbers_of_warns):
         warning = warnings_db.find_one({"author_id": str(member.id)})
         warnings_db.delete_one(warning)
-        embed_yes = discord.Embed(description=f"<:yes:1131632585244688424> | **{numbers_of_warns}** warnings removed for **{member.name}**", color=discord.Colour.green())
+        embed_yes = discord.Embed(description=f"<:yes:1131632585244688424> | **{numbers_of_warns}** warnings removed for **{member.name}**")
     await ctx.respond(embed=embed_yes)
 
 @bot.slash_command(name="mute", description="Mute an user")
