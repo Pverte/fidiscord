@@ -157,20 +157,20 @@ async def unban(ctx, user_id: str):
         user_id = int(user_id)  # Convert the user_id to an integer
         user = await bot.fetch_user(user_id)
         await ctx.guild.unban(user)
-        embed= discord.Embed(description=f"<:yes:1131632585244688424> | **{user.mention}** has been unbanned.")
+        embed= discord.Embed(description=f"<:yes:1131632585244688424> | **{user.mention}** has been unbanned.", color=discord.Colour.green())
         await ctx.respond(embed=embed)
     except ValueError:
-        embed_error= discord.Embed(description="<:error:1131632583696977990> | I need the user ID")
+        embed_error= discord.Embed(description="<:error:1131632583696977990> | I need the user ID", color=discord.Colour.red())
         await ctx.respond(embed=embed_error)
     except discord.NotFound:
-        embed_error_2= discord.Embed(description="<:error:1131632583696977990> | User not found. Make sure you provide the correct user ID.")
+        embed_error_2= discord.Embed(description="<:error:1131632583696977990> | User not found. Make sure you provide the correct user ID.", color=discord.Colour.red())
         await ctx.respond(embed=embed_error_2)
 
 @bot.slash_command(name="kick", description="Kick an user from the server") # kick command
 @has_staff_role()
 async def kick(ctx, member: discord.Member):
     await member.kick(reason=f"Kicked by {ctx.author.name}")
-    embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been kicked.")
+    embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been kicked.", color=discord.Colour.green())
     await ctx.respond(embed=embed)
 
 @bot.slash_command(name="warn", description="Warn a user.")
@@ -182,15 +182,15 @@ async def warn(ctx, member: discord.Member, *, reason: str):
     print(num_warnings)
     if num_warnings >= 3:
         await member.kick(reason="Reached three warnings")
-        embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been kicked for reaching three warnings")
+        embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been kicked for reaching three warnings", color=discord.Colour.green())
         await ctx.respond(embed=embed)
     else:
         try:
             dm_channel = await member.create_dm()
-            embed2 = discord.Embed(description=f"You have been warned in **Fur island** for: **{reason}**")
+            embed2 = discord.Embed(description=f"You have been warned in **Fur island** for: **{reason}**", color=discord.Colour.red())
             await dm_channel.send(embed=embed2)
         except discord.errors.HTTPException:
-            embed3 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been warned")
+            embed3 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been warned", color=discord.Colour.green())
             await ctx.respond(embed=embed3)
             return
         await ctx.respond(embed=embed3)
@@ -201,7 +201,7 @@ async def warnings(ctx, member: discord.Member):
     user_warnings = list(warnings_db.find({"author_id": str(member.id)}))  # Convert Cursor to a list
     num_warnings = len(user_warnings)
     if num_warnings == 0:
-        embed_nowarning = discord.Embed(description=f"**{member.name}** has no warnings")
+        embed_nowarning = discord.Embed(description=f"**{member.name}** has no warnings", color=discord.Colour.green())
         await ctx.respond(embed=embed_nowarning)
         return
     warning_message = f"Warnings for {member.name} (ID: {member.id}):\n\n"
@@ -219,24 +219,24 @@ async def remove_warn(ctx, member: discord.Member, numbers_of_warns: int):
     num_warnings = check_warnings(member.id)
 
     if numbers_of_warns <= 0:
-        embed_please = discord.Embed(description=f"<:error:1131632583696977990> **|** Please provide a positive number of warnings to remove")
+        embed_please = discord.Embed(description=f"<:error:1131632583696977990> **|** Please provide a positive number of warnings to remove", color=discord.Colour.red())
         await ctx.respond(embed=embed_please)
         return
 
     if num_warnings == 0:
-        embed_hasnt = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** has no warnings to remove.")
+        embed_hasnt = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** has no warnings to remove.", color=discord.Colour.green())
         await ctx.respond(embed=embed_hasnt)
         return
 
     if num_warnings < numbers_of_warns:
-        embed_2 = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** only has **{num_warnings}** warning(s)")
+        embed_2 = discord.Embed(description=f"<:error:1131632583696977990> | **{member.name}** only has **{num_warnings}** warning(s)", color=discord.Colour.green())
         await ctx.respond(embed=embed_2)
         return
     #removes the number of warnings from the user from the warnings database
     for i in range(numbers_of_warns):
         warning = warnings_db.find_one({"author_id": str(member.id)})
         warnings_db.delete_one(warning)
-        embed_yes = discord.Embed(description=f"<:yes:1131632585244688424> | **{numbers_of_warns}** warnings removed for **{member.name}**")
+        embed_yes = discord.Embed(description=f"<:yes:1131632585244688424> | **{numbers_of_warns}** warnings removed for **{member.name}**", color=discord.Colour.green())
     await ctx.respond(embed=embed_yes)
 
 @bot.slash_command(name="mute", description="Mute an user")
@@ -253,7 +253,7 @@ async def mute(ctx, member: discord.Member, reason=None):
     embed.add_field(name="Moderator :", value=ctx.author.mention, inline=False)
     embed.add_field(name="Raison :", value=reason, inline=False)
     await sendlog(embed)
-    embed_2 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.display_name}** has been muted successfully.")
+    embed_2 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.display_name}** has been muted successfully.", color=discord.Colour.green())
     await ctx.respond(embed=embed_2)
 
 @bot.slash_command(name="unmute", description="Unmute an user")
@@ -265,7 +265,7 @@ async def unmute(ctx, member: discord.Member):
     if modchannel is None:
         modchannel = bot.get_channel(modchan)
     await modchannel.send(embed=discord.Embed(title="New event", description=f"**{member.mention}** has been unmuted", colour=discord.Colour.green()))
-    embed2 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.display_name}** has been unmuted successfully.")
+    embed2 = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.display_name}** has been unmuted successfully.", color=discord.Colour.green())
     await ctx.respond(embed=embed2)
 
 @bot.slash_command(name="purge", description="Delete a specific number of messages in the channel.")
@@ -273,7 +273,7 @@ async def unmute(ctx, member: discord.Member):
 async def purge(ctx, limit: int):
     limit = min(limit + 1, 1000)
     deleted = await ctx.channel.purge(limit=limit)
-    embed = discord.Embed(description=f"<:yes:1131632585244688424> **|** Deleted {len(deleted) - 1} messages.")
+    embed = discord.Embed(description=f"<:yes:1131632585244688424> **|** Deleted {len(deleted) - 1} messages.", color=discord.Colour.green())
     await ctx.respond(embed=embed)
 
 @bot.slash_command(name="level", description="Check your level and XP")
