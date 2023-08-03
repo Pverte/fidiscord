@@ -201,7 +201,7 @@ async def warnings(ctx, member: discord.Member):
     user_warnings = list(warnings_db.find({"author_id": str(member.id)}))  # Convert Cursor to a list
     num_warnings = len(user_warnings)
     if num_warnings == 0:
-       embed_nowarning = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has no warnings", color=discord.Colour.green())
+        embed_nowarning = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has no warnings", color=discord.Colour.green())
         await ctx.respond(embed=embed_nowarning)
         return
     warning_message = f"Warnings for {member.name} (ID: {member.id}):\n\n"
