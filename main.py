@@ -128,8 +128,12 @@ def has_trial_staff_role():
             return False
 
         trial_staff_role_id = 1077722313140736131
+        staff_role_id = 1077722405188948049
+
         trial_staff_role = discord.utils.get(ctx.author.roles, id=trial_staff_role_id)
-        return trial_staff_role is not None
+        staff_role = discord.utils.get(ctx.author.roles, id=staff_role_id)
+
+        return trial_staff_role is not None or staff_role is not None
 
     return commands.check(predicate)
 
@@ -137,8 +141,10 @@ def has_staff_role():
     def predicate(ctx):
         if ctx.guild is None:
             return False
+
         staff_role_id = 1077722405188948049
         staff_role = discord.utils.get(ctx.author.roles, id=staff_role_id)
+
         return staff_role is not None
 
     return commands.check(predicate)
