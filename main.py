@@ -149,12 +149,31 @@ def has_staff_role():
 
     return commands.check(predicate)
 
-@bot.slash_command(name="ban", description="Ban a user from the server") # ban command
+@bot.slash_command(name="ban", description="Ban a user from the server")
 @has_staff_role()
 async def ban(ctx, member: discord.Member, *, reason: str = "No reason provided"):
-    await member.ban(reason=f"Banned by {ctx.author.name} for {reason}")
-    embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been banned.", color=discord.Colour.green())
-    await ctx.respond(embed=embed)
+    try:
+        await member.ban(reason=f"Banned by {ctx.author.name} for {reason}")
+        embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been banned.", color=discord.Colour.green())
+        await ctx.respond(embed=embed)
+    except discord.Forbidden as e:
+        print(f"Error: Insufficient permissions to ban {member.name}")
+        print(e)
+        embed_error = discord.Embed(description=f"Error: Insufficient permissions to ban {member.name}", color=discord.Colour.red())
+        await ctx.respond(embed=embed_error)
+        await send_error(embed_error)  # Send the error to devlog channel
+    except discord.HTTPException as e:
+        print(f"Error: An HTTP error occurred while trying to ban {member.name}")
+        print(e)
+        embed_error = discord.Embed(description=f"Error: An HTTP error occurred while trying to ban {member.name}", color=discord.Colour.red())
+        await ctx.respond(embed=embed_error)
+        await send_error(embed_error)  # Send the error to devlog channel
+    except Exception as e:
+        print(f"Error: An unexpected error occurred while trying to ban {member.name}")
+        print(e)
+        embed_error = discord.Embed(description=f"Error: An unexpected error occurred while trying to ban {member.name}", color=discord.Colour.red())
+        await ctx.respond(embed=embed_error)
+        await send_error(embed_error)  # Send the error to devlog channel
 
 @bot.slash_command(name="unban", description="Unban a user from the server")
 @has_staff_role()
