@@ -122,6 +122,21 @@ async def on_member_remove(member):
     embed.set_footer(text=f"ID: {member.id}")
     await sendlog(embed)
 
+def has_trial_staff_role():
+    def predicate(ctx):
+        if ctx.guild is None:
+            return False
+
+        trial_staff_role_id = 1077722313140736131
+        staff_role_id = 1077722405188948049
+
+        trial_staff_role = discord.utils.get(ctx.author.roles, id=trial_staff_role_id)
+        staff_role = discord.utils.get(ctx.author.roles, id=staff_role_id)
+
+        return trial_staff_role is not None or staff_role is not None
+
+    return commands.check(predicate)    
+
 @bot.slash_command(name="ban", description="Ban a user from the server") # ban command
 @commands.has_role(1077722405188948049)
 async def ban(ctx, member: discord.Member, *, reason: str = "No reason provided"):
@@ -155,8 +170,7 @@ async def kick(ctx, member: discord.Member):
     await ctx.respond(embed=embed)
 
 @bot.slash_command(name="warn", description="Warn a user.")
-@commands.has_role(1077722313140736131)
-@commands.has_role(1077722405188948049)
+@has_trial_staff_role()
 async def warn(ctx, member: discord.Member, *, reason: str):
     save_warning(member.id, reason, ctx.author.id) 
     num_warnings = check_warnings(member.id)
@@ -178,8 +192,7 @@ async def warn(ctx, member: discord.Member, *, reason: str):
         await ctx.respond(embed=embed3)
 
 @bot.slash_command(name="warnings", description="View warnings of a user")
-@commands.has_role(1077722313140736131)
-@commands.has_role(1077722405188948049)
+@has_trial_staff_role()
 async def warnings(ctx, member: discord.Member):
     user_warnings = list(warnings_db.find({"author_id": str(member.id)}))  # Convert Cursor to a list
     num_warnings = len(user_warnings)
@@ -197,8 +210,7 @@ async def warnings(ctx, member: discord.Member):
     await ctx.respond(warning_message)
 
 @bot.slash_command(name="unwarn", description="Remove warnings from a user. ")
-@commands.has_role(1077722313140736131)
-@commands.has_role(1077722405188948049)
+@has_trial_staff_role()
 async def remove_warn(ctx, member: discord.Member, numbers_of_warns: int):
     num_warnings = check_warnings(member.id)
 
@@ -224,8 +236,7 @@ async def remove_warn(ctx, member: discord.Member, numbers_of_warns: int):
     await ctx.respond(embed=embed_yes)
 
 @bot.slash_command(name="mute", description="Mute an user")
-@commands.has_role(1077722313140736131)
-@commands.has_role(1077722405188948049)
+@has_trial_staff_role()
 async def mute(ctx, member: discord.Member, reason=None):
     guild = ctx.guild.id
     muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
@@ -242,8 +253,7 @@ async def mute(ctx, member: discord.Member, reason=None):
     await ctx.respond(embed=embed_2)
 
 @bot.slash_command(name="unmute", description="Unmute an user")
-@commands.has_role(1077722313140736131)
-@commands.has_role(1077722405188948049)
+@has_trial_staff_role()
 async def unmute(ctx, member: discord.Member):
     muted_role = discord.utils.get(ctx.guild.roles, name="Muted")
     await member.remove_roles(muted_role)
@@ -255,8 +265,7 @@ async def unmute(ctx, member: discord.Member):
     await ctx.respond(embed=embed2)
 
 @bot.slash_command(name="purge", description="Delete a specific number of messages in the channel.")
-@commands.has_role(1077722313140736131)
-@commands.has_role(1077722405188948049)
+@has_trial_staff_role()
 async def purge(ctx, limit: int):
     limit = min(limit + 1, 1000)
     deleted = await ctx.channel.purge(limit=limit)
