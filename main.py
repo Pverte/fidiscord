@@ -141,7 +141,7 @@ def has_trial_staff_role():
 @commands.has_role(1077722405188948049)
 async def ban(ctx, member: discord.Member, *, reason: str = "No reason provided"):
     await member.ban(reason=f"Banned by {ctx.author.name} for {reason}")
-    embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been banned.", color=discord.Colour.green())
+    embed = discord.Embed(description=f"<:yes:1131632585244688424> | **{member.name}** has been banned for {reason}", color=discord.Colour.green())
     await ctx.respond(embed=embed)
     embed2 = discord.Embed(title="New event", description=f"{member.mention} has been banned for {reason}", colour=discord.Colour.red())
     await sendlog(embed=embed)
