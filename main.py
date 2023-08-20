@@ -387,7 +387,7 @@ async def uptime(ctx):
     embed = discord.Embed(title="Uptime", description=uptime_str, color=discord.Colour.blue())
     await ctx.respond(embed=embed)
 
-def has_say_command_role():
+def has_say_command_role(): #Not used, doesn't work
     def predicate(ctx):
         if ctx.guild is None:
             return False
@@ -400,7 +400,7 @@ def has_say_command_role():
     return commands.check(predicate)
     
 @bot.slash_command(name="say", description="Say something as the bot")
-@has_say_command_role()
+@commands.has_role(1049173292487032854)
 async def say(ctx, channel: discord.TextChannel, *, message: str):
     await channel.send(message)
     embed = discord.Embed(description=f"<:yes:1131632585244688424> | Message sent successfully to {channel.mention}", color=discord.Colour.green())
