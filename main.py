@@ -168,17 +168,13 @@ async def sync_level_roles(ctx):
     print("Got the user's level")
 
     # Get the roles the user should have
-    roles_to_add = []
     for level, role_id in levels_roles.items():
         if user_level >= level:
-            roles_to_add.append(role_id)
-
+            role = discord.utils.get(ctx.guild.roles, id=role_id)
+            print("Before the role")
+            await ctx.author.add_roles(role)
+            print("After the role")
     # Add the roles to the user
-    print("before adding the role")
-    print(roles_to_add)
-    await ctx.author.add_roles(*roles_to_add)
-    print("Added the roles to the user")
-
     await ctx.respond("Synced roles successfully.")
 
 @bot.slash_command(name="ban", description="Ban a user from the server") # ban command
