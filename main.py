@@ -153,12 +153,14 @@ async def sync_level_roles(ctx):
     """Gives the user the roles they should have based on their level"""
 
     # Get the user's level
+    print("start the function")
     user_id = ctx.author.id
     levels_author = levels_db.find_one({"_id": user_id})
     if levels_author is None:
         await ctx.respond("You haven't earned any XP yet.")
         return
     user_level = levels_author["level"]
+    print("Got the user's level")
 
     # Get the roles the user should have
     roles_to_add = []
@@ -168,6 +170,7 @@ async def sync_level_roles(ctx):
 
     # Add the roles to the user
     await ctx.author.add_roles(*roles_to_add)
+    print("Added the roles to the user")
 
     await ctx.respond("Synced roles successfully.")
 
