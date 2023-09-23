@@ -80,8 +80,13 @@ async def on_message(message):
         if levels_author["level"] in levels_roles.keys():
             #get the roles with te id in the dictionary
             role = discord.utils.get(message.guild.roles, id=levels_roles[levels_author["level"]])
-            await message.author.add_roles(role)
-            await message.channel.send(f"Congrats {message.author.mention}! You have been given the **{levels_roles[levels_author['level']]}** role!")
+            #check if the user already have the role
+            if role in message.author.roles:
+                pass
+            else:
+                #give the role to the user
+                await message.author.add_roles(role)
+                await message.channel.send(f"Congrats {message.author.mention}! You have been given the **{levels_roles[levels_author['level']]}** role!")
 
 @bot.event
 async def on_member_update(before, after):
