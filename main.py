@@ -148,7 +148,7 @@ def has_trial_staff_role():
     return commands.check(predicate)    
 
 
-@bot.slash_command(name="sync level roles", description="Sync the level roles with the database")
+@bot.slash_command(name="sync_levels", description="Sync the level roles with the database")
 async def sync_level_roles(ctx):
     """Gives the user the roles they should have based on their level"""
 
