@@ -17,7 +17,7 @@ intents = discord.Intents(guilds=True, members=True, messages=True, message_cont
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 # Constants
-levels_roles = {5: "level 5", 10: "level 10", 20: "level 20", 30: "level 30", 50: "level 50", 75: "level 75", 100: "level 100"}
+levels_roles = {5:  1055989656753295410, 10: 1055989666714763355, 20: 1055989675728306186, 30: 1055989984710111393, 40: 1128089617548185760, 50: 1128089736469291038, 60: 1128089803490078730}
 verification_role = 1049314940709773352
 welcome_chan = 1077721642496700457
 modchan = 1049065426744783033
@@ -49,6 +49,11 @@ def save_warning(user_id, reason, moderator_id):
         "timestamp": current_time
     })
 
+
+def modmail(user, id_modmail):
+    if id_modmail==None:
+        pass
+
 # Bot events
 @bot.event
 async def on_ready():
@@ -72,6 +77,11 @@ async def on_message(message):
         if levels_author["xp"] >= xp_needed:
             await message.reply(f"Congrats {message.author.mention}! You are now level {levels_author['level'] + 1}!")
             levels_db.update_one({"_id": author_id}, {"$inc": {"level": 1}})
+        if levels_author["level"] in levels_roles.keys():
+            #get the roles with te id in the dictionary
+            role = discord.utils.get(message.guild.roles, id=levels_roles[levels_author["level"]])
+            await message.author.add_roles(role)
+            await message.channel.send(f"Congrats {message.author.mention}! You have been given the **{levels_roles[levels_author['level']]}** role!")
 
 @bot.event
 async def on_member_update(before, after):
@@ -136,6 +146,30 @@ def has_trial_staff_role():
         return trial_staff_role is not None or staff_role is not None
 
     return commands.check(predicate)    
+
+
+@bot.slash_command(name="sync level roles", description="Sync the level roles with the database")
+async def sync_level_roles(ctx):
+    """Gives the user the roles they should have based on their level"""
+
+    # Get the user's level
+    user_id = ctx.author.id
+    levels_author = levels_db.find_one({"_id": user_id})
+    if levels_author is None:
+        await ctx.respond("You haven't earned any XP yet.")
+        return
+    user_level = levels_author["level"]
+
+    # Get the roles the user should have
+    roles_to_add = []
+    for level, role_id in levels_roles.items():
+        if user_level >= level:
+            roles_to_add.append(role_id)
+
+    # Add the roles to the user
+    await ctx.author.add_roles(*roles_to_add)
+
+    await ctx.respond("Synced roles successfully.")
 
 @bot.slash_command(name="ban", description="Ban a user from the server") # ban command
 @commands.has_role(1077722405188948049)
