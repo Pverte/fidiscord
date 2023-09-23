@@ -175,6 +175,7 @@ async def sync_level_roles(ctx):
 
     # Add the roles to the user
     print("before adding the role")
+    print(roles_to_add)
     await ctx.author.add_roles(*roles_to_add)
     print("Added the roles to the user")
 
