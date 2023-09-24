@@ -85,6 +85,10 @@ async def on_message(message):
                 pass
             else:
                 #give the role to the user
+                for role in message.author.roles:
+                    if role.id in levels_roles.values():
+                        roles = discord.utils.get(message.guild.roles, id=role.id)
+                        await message.author.remove_roles(roles)
                 await message.author.add_roles(role)
                 await message.channel.send(f"Congrats {message.author.mention}! You have been given the **{levels_roles[levels_author['level']]}** role!")
 
