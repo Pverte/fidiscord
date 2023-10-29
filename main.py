@@ -90,7 +90,7 @@ async def on_message(message):
                         roles = discord.utils.get(message.guild.roles, id=role.id)
                         await message.author.remove_roles(roles)
                 await message.author.add_roles(role)
-                await message.channel.send(f"Congrats {message.author.mention}! You have been given the **{levels_roles[levels_author['level']]}** role!")
+                await message.channel.send(f"Congrats {message.author.mention}! You have been given the **{role.name}** role!")
 
 @bot.event
 async def on_member_update(before, after):
