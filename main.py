@@ -136,6 +136,8 @@ async def on_application_command_error(context, exception):
     print(exception)
 @bot.event
 async def on_member_remove(member):
+    #delete the user from the database
+    levels_db.delete_one({"_id": member.id})
     embed = discord.Embed(title="New event", description=f"{member.mention} has left the server", colour=discord.Colour.red())
     embed.set_author(name=member, icon_url=member.display_avatar)
     embed.set_footer(text=f"ID: {member.id}")
